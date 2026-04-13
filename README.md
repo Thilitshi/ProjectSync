@@ -45,10 +45,6 @@
 | **Authentication** | JWT, Bcrypt |
 | **Email** | Nodemailer |
 
-## 🚀 Live Demo
-
-- **Frontend**: https://projectsync.vercel.app
-- **Backend API**: https://projectsync-aevd.onrender.com
 
 ## 📦 Installation
 
