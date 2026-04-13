@@ -1,9 +1,12 @@
 # 🚀 ProjectSync
 
 **Work Smarter, Together** 
-## 📸 Screenshots
+
 
 ### 🔐 Authentication
+| Frontpage |
+|-------|
+| ![Frontpage](images/Dashboard11.jpeg) 
 
 | Login | Register |
 |-------|----------|
