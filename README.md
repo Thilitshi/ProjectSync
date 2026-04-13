@@ -6,21 +6,21 @@
 
 ### 🔐 Authentication
 
-| Login | Register | Forgot Password |
-|-------|----------|-----------------|
-| ![Login](login-page.jpeg) | ![Register](register-page.jpeg) | Forgot password email sent |
+| Login | Register |
+|-------|----------|
+| ![Login](images/login-page.jpeg) | ![Register](images/register-page.jpeg) |
 
 ### 📧 Password Reset
 
-| Reset Email Received | Reset Password Form |
-|---------------------|---------------------|
-| ![Reset Email](reset-email.jpeg) | ![Reset Form](reset-password-form.jpeg) |
+| Reset Email | Reset Form |
+|-------------|------------|
+| ![Reset Email](images/reset-email.jpeg) | ![Reset Form](images/reset-password-form.jpeg) |
 
 ### 🏠 Main Application
 
 | Dashboard | Live Feed | My Projects |
 |-----------|-----------|-------------|
-| ![Dashboard](dashboard.jpeg) | ![Live Feed](live-feed.jpeg) | ![My Projects](my-projects.jpeg) |
+| ![Dashboard](images/dashboard.jpeg) | ![Live Feed](images/live-feed.jpeg) | ![My Projects](images/my-projects.jpeg) |
 
 ## ✨ Features
 
@@ -49,13 +49,6 @@
 - **Backend API**: https://projectsync-aevd.onrender.com
 
 ## 📦 Installation
-
-### Prerequisites
-- Node.js (v18 or higher)
-- MongoDB (local or Atlas)
-- npm or yarn
-
-### Clone and Setup
 
 ```bash
 # Clone the repository
