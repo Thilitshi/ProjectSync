@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSocket } from '../hooks/useSocket';
 
-const API = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API = process.env.REACT_APP_API_URL || '${API_URL}';
 
 export default function Feed() {
   const [projects, setProjects] = useState([]);

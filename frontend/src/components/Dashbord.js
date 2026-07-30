@@ -12,7 +12,7 @@ function Dashboard({ token, setToken }) {
   const navigate = useNavigate();
   
   useEffect(() => {
-    const newSocket = io('http://localhost:5000');
+    const newSocket = io('${SOCKET_URL}');
     
     try {
       const userId = JSON.parse(atob(token.split('.')[1])).id;

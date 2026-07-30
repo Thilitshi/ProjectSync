@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const API = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API = process.env.REACT_APP_API_URL || '${API_URL}';
 
 const SUPPORT_OPTIONS = [
   'frontend', 'backend', 'design', 'devops', 

@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 
 // Socket URL configuration - works for both local and production
-const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000';
+const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || '${SOCKET_URL}';
 
 
 let socket = null;

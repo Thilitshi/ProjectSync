@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 // API URL configuration - works for both local and production
-const API = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API = process.env.REACT_APP_API_URL || '${API_URL}';
 
 export default function CelebrationWall() {
   const [projects, setProjects] = useState([]);

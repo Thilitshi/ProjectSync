@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const API = 'http://localhost:5000/api';
+const API = '${API_URL}';
 
 function Register({ setToken }) {
   const [username, setUsername] = useState('');
