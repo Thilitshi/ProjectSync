@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 const STAGES = ['idea', 'planning', 'building', 'testing', 'launched', 'completed'];
 
 // Add this line - API configuration
-const API = process.env.REACT_APP_API_URL || '${API_URL}';
+const API = process.env.REACT_APP_API_URL || "https://projectsync-1-qdsm.onrender.com/api";
 
 export default function MyProjects() {
   const [projects, setProjects] = useState([]);

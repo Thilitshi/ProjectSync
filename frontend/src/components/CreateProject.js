@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const API = process.env.REACT_APP_API_URL || '${API_URL}';
+const API = process.env.REACT_APP_API_URL || "https://projectsync-1-qdsm.onrender.com/api";
 
 const SUPPORT_OPTIONS = [
   'frontend', 'backend', 'design', 'devops', 

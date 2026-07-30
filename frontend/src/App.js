@@ -5,7 +5,7 @@ import CelebrationWall from './components/CelebrationWall';
 import MyProjects from './components/MyProjects';
 
 // API Base URL - uses environment variable or defaults to localhost
-const API = process.env.REACT_APP_API_URL || '${API_URL}';
+const API = process.env.REACT_APP_API_URL || "https://projectsync-1-qdsm.onrender.com/api";
 
 function App() {
   // ALL HOOKS AT TOP LEVEL

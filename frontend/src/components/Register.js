@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const API = '${API_URL}';
+const API = "https://projectsync-1-qdsm.onrender.com/api";
 
 function Register({ setToken }) {
   const [username, setUsername] = useState('');

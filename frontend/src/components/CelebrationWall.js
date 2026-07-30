@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 // API URL configuration - works for both local and production
-const API = process.env.REACT_APP_API_URL || '${API_URL}';
+const API = process.env.REACT_APP_API_URL || "https://projectsync-1-qdsm.onrender.com/api";
 
 export default function CelebrationWall() {
   const [projects, setProjects] = useState([]);

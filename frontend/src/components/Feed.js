@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSocket } from '../hooks/useSocket';
 
-const API = process.env.REACT_APP_API_URL || '${API_URL}';
+const API = process.env.REACT_APP_API_URL || "https://projectsync-1-qdsm.onrender.com/api";
 
 export default function Feed() {
   const [projects, setProjects] = useState([]);

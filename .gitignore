@@ -42,3 +42,16 @@ frontend/.env.production.local
 # Logs
 logs/
 *.log
+
+
+
+# Add this for more security
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
+coverage/
+.nyc_output/
+.env.*
+!.env.example
