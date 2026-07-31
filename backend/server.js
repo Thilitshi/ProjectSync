@@ -44,13 +44,15 @@ const server = http.createServer(app);
 // ============================================
 // 📋 CORS Configuration
 // ============================================
+
+
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
   'https://projectsync.vercel.app',
-  process.env.CLIENT_URL,
-  process.env.FRONTEND_URL
+  'https://project-sync-101.netlify.app'
 ].filter(Boolean);
+
 
 console.log('📧 EMAIL_USER:', process.env.EMAIL_USER || 'NOT SET');
 console.log('📧 EMAIL_PASSWORD exists:', !!process.env.EMAIL_PASSWORD);
@@ -70,15 +72,18 @@ app.use(helmet({
 // 🌐 CORS Middleware
 // ============================================
 app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log('❌ Blocked by CORS:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: function (origin, callback) {
+  console.log("🌍 Request Origin:", origin);
+
+  if (!origin) return callback(null, true);
+
+  if (allowedOrigins.includes(origin)) {
+    callback(null, true);
+  } else {
+    console.log("❌ Blocked by CORS:", origin);
+    callback(new Error("Not allowed by CORS"));
+  }
+},
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
