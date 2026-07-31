@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 
 // Socket URL configuration - works for both local and production
-const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || '${SOCKET_URL}';
+const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || "https://projectsync-1-qdsm.onrender.com";
 
 
 let socket = null;

@@ -12,7 +12,7 @@ function Dashboard({ token, setToken }) {
   const navigate = useNavigate();
   
   useEffect(() => {
-    const newSocket = io('${SOCKET_URL}');
+    const newSocket = io("https://projectsync-1-qdsm.onrender.com");
     
     try {
       const userId = JSON.parse(atob(token.split('.')[1])).id;
