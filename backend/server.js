@@ -49,8 +49,7 @@ const server = http.createServer(app);
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
-  'https://projectsync.vercel.app',
-  'https://project-sync-101.netlify.app'
+  'https://project-sync-six.vercel.app',
 ].filter(Boolean);
 
 

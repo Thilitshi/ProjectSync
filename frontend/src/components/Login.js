@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -7,59 +5,43 @@ import toast from 'react-hot-toast';
 
 const API = "https://projectsync-1-qdsm.onrender.com/api";
 
-function Register({ setToken }) {
-  const [username, setUsername] = useState('');
+function Login({ setToken }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
-      const res = await axios.post(`${API}/auth/register`, { username, email, password });
+      const res = await axios.post(`${API}/auth/login`, { email, password });
       setToken(res.data.token);
       localStorage.setItem('token', res.data.token);
-      toast.success('Account created successfully! 🚀');
+      toast.success('Welcome back! 🚀');
       navigate('/');
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Registration failed');
+      toast.error(error.response?.data?.error || 'Login failed');
     } finally {
       setLoading(false);
     }
   };
-  
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="bg-gray-800/50 backdrop-blur-sm p-8 rounded-2xl shadow-2xl w-full max-w-md border border-green-500/30">
         <div className="text-center mb-8">
-          <div className="text-5xl mb-4">🌟</div>
-          <h2 className="text-3xl font-bold text-green-400">Join the Community</h2>
-          <p className="text-gray-400 mt-2">Start building in public today</p>
+          <div className="text-5xl mb-4">🚀</div>
+          <h2 className="text-3xl font-bold text-green-400">Welcome Back</h2>
+          <p className="text-gray-400 mt-2">Login to your account</p>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="username" className="block text-gray-300 mb-2">Username</label>
+            <label htmlFor="login-email" className="block text-gray-300 mb-2">Email</label>
             <input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="input-field"
-              placeholder="cool_dev_123"
-              autoComplete="username"
-              required
-              minLength={3}
-            />
-          </div>
-          
-          <div>
-            <label htmlFor="email" className="block text-gray-300 mb-2">Email</label>
-            <input
-              id="email"
+              id="login-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -69,35 +51,40 @@ function Register({ setToken }) {
               required
             />
           </div>
-          
+
           <div>
-            <label htmlFor="password" className="block text-gray-300 mb-2">Password</label>
+            <label htmlFor="login-password" className="block text-gray-300 mb-2">Password</label>
             <input
-              id="password"
+              id="login-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="input-field"
               placeholder="••••••••"
-              autoComplete="new-password"
+              autoComplete="current-password"
               required
-              minLength={6}
             />
           </div>
-          
+
           <button
             type="submit"
             disabled={loading}
             className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Creating account...' : 'Register'}
+            {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
-        
-        <p className="mt-6 text-center text-gray-400">
-          Already have an account?{' '}
-          <Link to="/login" className="text-green-400 hover:text-green-300 font-semibold">
-            Login
+
+        <p className="mt-4 text-center text-gray-400">
+          <Link to="/forgot-password" className="text-green-400 hover:text-green-300 text-sm">
+            Forgot password?
+          </Link>
+        </p>
+
+        <p className="mt-4 text-center text-gray-400">
+          Don't have an account?{' '}
+          <Link to="/register" className="text-green-400 hover:text-green-300 font-semibold">
+            Register
           </Link>
         </p>
       </div>
@@ -105,4 +92,4 @@ function Register({ setToken }) {
   );
 }
 
-export default Register;
+export default Login;

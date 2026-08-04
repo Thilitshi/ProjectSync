@@ -54,7 +54,6 @@ function App() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      // Verify token and get user info
       fetch(`${API}/auth/me`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
@@ -111,7 +110,8 @@ function App() {
       setPage('dashboard');
       
     } catch (err) {
-      setError('Cannot connect to server');
+      setError('Cannot connect to server. Check console (F12) for details.');
+      console.error('Login error:', err);
     }
   };
 
@@ -150,7 +150,8 @@ function App() {
       setPage('dashboard');
       
     } catch (err) {
-      setError('Cannot connect to server');
+      setError('Cannot connect to server. Check console (F12) for details.');
+      console.error('Register error:', err);
     }
   };
 
@@ -414,20 +415,23 @@ function App() {
 
           <form onSubmit={handleResetSubmit}>
             <div className="mb-4">
-              <label className="block mb-2 text-gray-400">New Password</label>
+              <label htmlFor="reset-password" className="block mb-2 text-gray-400">New Password</label>
               <input
+                id="reset-password"
                 type="password"
                 value={resetPassword}
                 onChange={e => setResetPassword(e.target.value)}
                 className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-green-500 focus:outline-none"
                 placeholder="••••••••"
+                autoComplete="new-password"
                 required
               />
             </div>
             
             <div className="mb-6">
-              <label className="block mb-2 text-gray-400">Confirm New Password</label>
+              <label htmlFor="reset-confirm" className="block mb-2 text-gray-400">Confirm New Password</label>
               <input
+                id="reset-confirm"
                 type="password"
                 value={resetConfirm}
                 onChange={e => setResetConfirm(e.target.value)}
@@ -437,6 +441,7 @@ function App() {
                     : 'border-gray-600 focus:border-green-500'
                 }`}
                 placeholder="••••••••"
+                autoComplete="new-password"
                 required
               />
               {resetConfirm && resetPassword === resetConfirm && (
@@ -471,13 +476,15 @@ function App() {
 
           <form onSubmit={handleForgotSubmit}>
             <div className="mb-6">
-              <label className="block mb-2 text-gray-400">Enter your email</label>
+              <label htmlFor="forgot-email" className="block mb-2 text-gray-400">Enter your email</label>
               <input
+                id="forgot-email"
                 type="email"
                 value={forgotEmail}
                 onChange={e => setForgotEmail(e.target.value)}
                 className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-green-500 focus:outline-none"
                 placeholder="developer@example.com"
+                autoComplete="email"
                 required
               />
             </div>
@@ -549,27 +556,35 @@ function App() {
 
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div>
-                <label className="block mb-2 text-gray-400 text-sm font-medium">Email Address</label>
+                <label htmlFor="login-email" className="block mb-2 text-gray-400 text-sm font-medium">
+                  Email Address
+                </label>
                 <input
+                  id="login-email"
                   name="email"
                   type="email"
                   value={loginData.email}
                   onChange={handleLoginChange}
                   className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-green-500 focus:outline-none"
                   placeholder="developer@example.com"
+                  autoComplete="email"
                   required
                 />
               </div>
               
               <div>
-                <label className="block mb-2 text-gray-400 text-sm font-medium">Password</label>
+                <label htmlFor="login-password" className="block mb-2 text-gray-400 text-sm font-medium">
+                  Password
+                </label>
                 <input
+                  id="login-password"
                   name="password"
                   type="password"
                   value={loginData.password}
                   onChange={handleLoginChange}
                   className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-green-500 focus:outline-none"
                   placeholder="••••••••"
+                  autoComplete="current-password"
                   required
                 />
                 <div className="flex justify-end mt-2">
@@ -601,6 +616,7 @@ function App() {
                 <button 
                   onClick={() => {
                     setLoginData({ email: '', password: '' });
+                    setError('');
                     setPage('register');
                   }}
                   className="text-green-400 hover:text-green-300 font-semibold transition"
@@ -640,47 +656,62 @@ function App() {
 
           <form onSubmit={handleRegisterSubmit}>
             <div className="mb-4">
-              <label className="block mb-2 text-gray-400 text-sm">Username</label>
+              <label htmlFor="reg-username" className="block mb-2 text-gray-400 text-sm">
+                Username
+              </label>
               <input
+                id="reg-username"
                 name="username"
                 type="text"
                 value={formData.username}
                 onChange={handleChange}
                 className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-green-500 focus:outline-none"
                 placeholder="cool_dev_123"
+                autoComplete="username"
                 required
               />
             </div>
 
             <div className="mb-4">
-              <label className="block mb-2 text-gray-400 text-sm">Email</label>
+              <label htmlFor="reg-email" className="block mb-2 text-gray-400 text-sm">
+                Email
+              </label>
               <input
+                id="reg-email"
                 name="email"
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
                 className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-green-500 focus:outline-none"
                 placeholder="developer@example.com"
+                autoComplete="email"
                 required
               />
             </div>
 
             <div className="mb-4">
-              <label className="block mb-2 text-gray-400 text-sm">Password</label>
+              <label htmlFor="reg-password" className="block mb-2 text-gray-400 text-sm">
+                Password
+              </label>
               <input
+                id="reg-password"
                 name="password"
                 type="password"
                 value={formData.password}
                 onChange={handleChange}
                 className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-green-500 focus:outline-none"
                 placeholder="••••••••"
+                autoComplete="new-password"
                 required
               />
             </div>
 
             <div className="mb-6">
-              <label className="block mb-2 text-gray-400 text-sm">Re-enter Password</label>
+              <label htmlFor="reg-confirm" className="block mb-2 text-gray-400 text-sm">
+                Re-enter Password
+              </label>
               <input
+                id="reg-confirm"
                 name="confirmPassword"
                 type="password"
                 value={formData.confirmPassword}
@@ -691,6 +722,7 @@ function App() {
                     : 'border-gray-600 focus:border-green-500'
                 }`}
                 placeholder="••••••••"
+                autoComplete="new-password"
                 required
               />
               {formData.confirmPassword && formData.password === formData.confirmPassword && (
@@ -710,7 +742,11 @@ function App() {
             <p className="text-gray-500 text-sm">
               Already have an account?{' '}
               <button 
-                onClick={() => setPage('login')}
+                onClick={() => {
+                  setFormData({ username: '', email: '', password: '', confirmPassword: '' });
+                  setError('');
+                  setPage('login');
+                }}
                 className="text-green-400 hover:text-green-300 font-semibold"
               >
                 Sign In
