@@ -44,26 +44,15 @@ const server = http.createServer(app);
 // ============================================
 // 📋 CORS Configuration
 // ============================================
-
-
-
 const allowedOrigins = [
   'http://localhost:3000',
-  'http://localhost:5173',
-  'https://projectsync.vercel.app',
-  'https://project-sync-m5hwi5jc0-softwaresindicate.vercel.app',
-  
-  'https://project-sync-six.vercel.app',
-  'https://project-sync-git-master-softwaresindicate.vercel.app',
-  'https://project-sync-m5c025gb2-softwaresindicate.vercel.app'
+  'http://localhost:5173'
 ].filter(Boolean);
-
 
 console.log('📧 EMAIL_USER:', process.env.EMAIL_USER || 'NOT SET');
 console.log('📧 EMAIL_PASSWORD exists:', !!process.env.EMAIL_PASSWORD);
 console.log('🔐 JWT_SECRET exists:', !!process.env.JWT_SECRET);
 console.log('🌍 NODE_ENV:', process.env.NODE_ENV || 'development');
-console.log('✅ Allowed Origins:', allowedOrigins);
 
 // ============================================
 // 🛡️ Security Middleware
@@ -78,17 +67,29 @@ app.use(helmet({
 // ============================================
 app.use(cors({
   origin: function (origin, callback) {
-  console.log("🌍 Request Origin:", origin);
+    console.log("🌍 Request Origin:", origin);
 
-  if (!origin) return callback(null, true);
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
 
-  if (allowedOrigins.includes(origin)) {
-    callback(null, true);
-  } else {
+    // Allow localhost
+    if (origin.startsWith('http://localhost')) {
+      return callback(null, true);
+    }
+
+    // Allow ANY Vercel deployment automatically
+    if (origin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+
+    // Allow specific production domains
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
     console.log("❌ Blocked by CORS:", origin);
     callback(new Error("Not allowed by CORS"));
-  }
-},
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
