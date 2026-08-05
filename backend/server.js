@@ -46,11 +46,16 @@ const server = http.createServer(app);
 // ============================================
 
 
+
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
   'https://projectsync.vercel.app',
   'https://project-sync-m5hwi5jc0-softwaresindicate.vercel.app',
+  
+  'https://project-sync-six.vercel.app',
+  'https://project-sync-git-master-softwaresindicate.vercel.app',
+  'https://project-sync-m5c025gb2-softwaresindicate.vercel.app'
 ].filter(Boolean);
 
 

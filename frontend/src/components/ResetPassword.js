@@ -1,6 +1,4 @@
-import React, { useState } from 'react';
-
-const API = "https://projectsync-1-qdsm.onrender.com/api";
+import React, { useState, useEffect } from 'react';
 
 const ResetPassword = ({ resetToken }) => {
   const [password, setPassword] = useState('');
@@ -9,6 +7,7 @@ const ResetPassword = ({ resetToken }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  
   const handleResetSubmit = async (e) => {
     e.preventDefault();
 
@@ -27,7 +26,7 @@ const ResetPassword = ({ resetToken }) => {
     setSuccess('');
 
     try {
-      const res = await fetch(`${API}/auth/reset-password/${resetToken}`, {
+      const res = await fetch(`${API_URL}/auth/reset-password/${resetToken}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password }),
@@ -56,20 +55,16 @@ const ResetPassword = ({ resetToken }) => {
       {success && <p style={{ color: 'green' }}>{success}</p>}
 
       <input
-        id="new-password"
         type="password"
         placeholder="New password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        autoComplete="new-password"
       />
       <input
-        id="confirm-password"
         type="password"
         placeholder="Confirm password"
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
-        autoComplete="new-password"
       />
       <button type="submit" disabled={isLoading}>
         {isLoading ? 'Resetting...' : 'Reset Password'}

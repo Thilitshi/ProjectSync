@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -21,7 +19,6 @@ function Register({ setToken }) {
     try {
       const res = await axios.post(`${API}/auth/register`, { username, email, password });
       setToken(res.data.token);
-      localStorage.setItem('token', res.data.token);
       toast.success('Account created successfully! 🚀');
       navigate('/');
     } catch (error) {
@@ -42,44 +39,38 @@ function Register({ setToken }) {
         
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="username" className="block text-gray-300 mb-2">Username</label>
+            <label className="block text-gray-300 mb-2">Username</label>
             <input
-              id="username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="input-field"
               placeholder="cool_dev_123"
-              autoComplete="username"
               required
               minLength={3}
             />
           </div>
           
           <div>
-            <label htmlFor="email" className="block text-gray-300 mb-2">Email</label>
+            <label className="block text-gray-300 mb-2">Email</label>
             <input
-              id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="input-field"
               placeholder="developer@example.com"
-              autoComplete="email"
               required
             />
           </div>
           
           <div>
-            <label htmlFor="password" className="block text-gray-300 mb-2">Password</label>
+            <label className="block text-gray-300 mb-2">Password</label>
             <input
-              id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="input-field"
               placeholder="••••••••"
-              autoComplete="new-password"
               required
               minLength={6}
             />
@@ -106,3 +97,5 @@ function Register({ setToken }) {
 }
 
 export default Register;
+
+
