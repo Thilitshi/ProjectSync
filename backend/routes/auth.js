@@ -4,7 +4,10 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const User = require('../models/User');
 
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+const FRONTEND_URL =
+  process.env.FRONTEND_URL ||
+  process.env.CLIENT_URL ||
+  'http://localhost:3000';
 
 // Register
 router.post('/register', async (req, res) => {
