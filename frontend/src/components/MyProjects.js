@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 
 const STAGES = ['idea', 'planning', 'building', 'testing', 'launched', 'completed'];
 
-// Add this line - API configuration
 const API = process.env.REACT_APP_API_URL || "https://projectsync-1-qdsm.onrender.com/api";
 
 export default function MyProjects() {
@@ -17,21 +17,22 @@ export default function MyProjects() {
   const fetchMyProjects = async () => {
     const token = localStorage.getItem('token');
     try {
-      // UPDATED: Use API variable instead of hardcoded URL
       const res = await fetch(`${API}/projects/my-projects`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
       setProjects(data);
+      return data; // return so callers can use fresh data
     } catch (err) {
       console.error('Error fetching projects:', err);
+      toast.error('Failed to load projects');
+      return [];
     }
   };
 
   const updateStage = async (projectId, newStage) => {
     const token = localStorage.getItem('token');
     try {
-      // UPDATED: Use API variable
       const res = await fetch(`${API}/projects/${projectId}`, {
         method: 'PATCH',
         headers: {
@@ -42,13 +43,23 @@ export default function MyProjects() {
       });
       
       if (res.ok) {
-        fetchMyProjects();
-        if (selectedProject?._id === projectId) {
-          setSelectedProject({...selectedProject, stage: newStage});
+        // ✅ Await the refresh and get fresh data
+        const updatedProjects = await fetchMyProjects();
+        
+        // ✅ Refresh selectedProject from the newly fetched list
+        const freshProject = updatedProjects.find(p => p._id === projectId);
+        if (freshProject) {
+          setSelectedProject(freshProject);
         }
+        
+        toast.success(`Stage updated to ${newStage}!`);
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        toast.error(errorData.error || 'Failed to update stage');
       }
     } catch (err) {
       console.error('Error updating stage:', err);
+      toast.error('Cannot connect to server');
     }
   };
 
@@ -57,7 +68,6 @@ export default function MyProjects() {
     
     const token = localStorage.getItem('token');
     try {
-      // UPDATED: Use API variable
       const res = await fetch(`${API}/projects/${selectedProject._id}/milestones`, {
         method: 'POST',
         headers: {
@@ -69,16 +79,17 @@ export default function MyProjects() {
       
       if (res.ok) {
         setMilestoneTitle('');
-        fetchMyProjects();
-        // Refresh selected project
-        const updated = await fetch(`${API}/projects/my-projects`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }).then(r => r.json());
-        const fresh = updated.find(p => p._id === selectedProject._id);
-        setSelectedProject(fresh);
+        const updatedProjects = await fetchMyProjects();
+        const fresh = updatedProjects.find(p => p._id === selectedProject._id);
+        if (fresh) setSelectedProject(fresh);
+        toast.success('Milestone added!');
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        toast.error(errorData.error || 'Failed to add milestone');
       }
     } catch (err) {
       console.error('Error adding milestone:', err);
+      toast.error('Cannot connect to server');
     }
   };
 
@@ -90,7 +101,6 @@ export default function MyProjects() {
     return emojis[stage] || '💡';
   };
 
-  // Calculate progress based on stage
   const getProgress = (stage) => {
     const progressMap = {
       idea: 0,
@@ -139,7 +149,6 @@ export default function MyProjects() {
                   </div>
                 </div>
                 
-                {/* Progress Bar */}
                 <div className="mt-4">
                   <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
                     <div 
