@@ -9,6 +9,8 @@ export default function MyProjects() {
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [milestoneTitle, setMilestoneTitle] = useState('');
+  const [readmeText, setReadmeText] = useState('');
+  const [readmeSaving, setReadmeSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -44,8 +46,8 @@ export default function MyProjects() {
       
       if (res.ok) {
         toast.success('Project deleted');
-        setSelectedProject(null);
-        await fetchMyProjects();
+        setSelectedProject(null);        // ✅ close modal
+        await fetchMyProjects();          // ✅ refresh list (deleted one gone)
       } else {
         const errorData = await res.json().catch(() => ({}));
         toast.error(errorData.error || 'Failed to delete project');
@@ -71,9 +73,7 @@ export default function MyProjects() {
       if (res.ok) {
         const updatedProjects = await fetchMyProjects();
         const freshProject = updatedProjects.find(p => p._id === projectId);
-        if (freshProject) {
-          setSelectedProject(freshProject);
-        }
+        if (freshProject) setSelectedProject(freshProject);
         toast.success(`Stage updated to ${newStage}!`);
       } else {
         const errorData = await res.json().catch(() => ({}));
@@ -86,25 +86,28 @@ export default function MyProjects() {
   };
 
   const addMilestone = async () => {
-    if (!milestoneTitle.trim()) return;
+    if (!milestoneTitle.trim()) {
+      toast.error('Enter a milestone title');
+      return;
+    }
     
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`${API}/projects/${selectedProject._id}/milestones`, {
+      // ✅ FIXED: /milestone (singular) to match your backend
+      const res = await fetch(`${API}/projects/${selectedProject._id}/milestone`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ title: milestoneTitle })
+        body: JSON.stringify({ title: milestoneTitle.trim() })
       });
       
       if (res.ok) {
         setMilestoneTitle('');
-        const updatedProjects = await fetchMyProjects();
-        const fresh = updatedProjects.find(p => p._id === selectedProject._id);
-        if (fresh) setSelectedProject(fresh);
-        toast.success('Milestone added!');
+        await fetchMyProjects();
+        setSelectedProject(null);   // ✅ CLOSE modal, go back to list
+        toast.success('Milestone updated!');
       } else {
         const errorData = await res.json().catch(() => ({}));
         toast.error(errorData.error || 'Failed to add milestone');
@@ -112,6 +115,39 @@ export default function MyProjects() {
     } catch (err) {
       console.error('Error adding milestone:', err);
       toast.error('Cannot connect to server');
+    }
+  };
+
+  const saveReadme = async () => {
+    if (!selectedProject) return;
+    
+    setReadmeSaving(true);
+    const token = localStorage.getItem('token');
+    
+    try {
+      const res = await fetch(`${API}/projects/${selectedProject._id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ readme: readmeText })
+      });
+      
+      if (res.ok) {
+        const updatedProjects = await fetchMyProjects();
+        const fresh = updatedProjects.find(p => p._id === selectedProject._id);
+        if (fresh) setSelectedProject(fresh);
+        toast.success('README saved!');
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        toast.error(errorData.error || 'Failed to save README');
+      }
+    } catch (err) {
+      console.error('Error saving README:', err);
+      toast.error('Cannot connect to server');
+    } finally {
+      setReadmeSaving(false);
     }
   };
 
@@ -132,11 +168,11 @@ export default function MyProjects() {
     try {
       const res = await fetch(`${API}/projects/${selectedProject._id}/documents`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Authorization': `Bearer ${token}` },
         body: formData
       });
+
+      const data = await res.json().catch(() => ({}));
 
       if (res.ok) {
         toast.success('Document uploaded!');
@@ -144,8 +180,7 @@ export default function MyProjects() {
         const fresh = updatedProjects.find(p => p._id === selectedProject._id);
         if (fresh) setSelectedProject(fresh);
       } else {
-        const errorData = await res.json().catch(() => ({}));
-        toast.error(errorData.error || 'Failed to upload document');
+        toast.error(data.error || 'Failed to upload document');
       }
     } catch (err) {
       console.error('Error uploading document:', err);
@@ -179,6 +214,12 @@ export default function MyProjects() {
       console.error('Error deleting document:', err);
       toast.error('Cannot connect to server');
     }
+  };
+
+  const openProject = (project) => {
+    setSelectedProject(project);
+    setReadmeText(project.readme || project.description || '');
+    setMilestoneTitle('');
   };
 
   const getStageEmoji = (stage) => {
@@ -223,7 +264,7 @@ export default function MyProjects() {
             {projects.map(project => (
               <div
                 key={project._id}
-                onClick={() => setSelectedProject(project)}
+                onClick={() => openProject(project)}
                 className="bg-gray-800/50 p-6 rounded-2xl cursor-pointer hover:bg-gray-700 transition-all duration-300 border border-gray-700 hover:border-green-500"
               >
                 <div className="flex justify-between items-center">
@@ -231,9 +272,7 @@ export default function MyProjects() {
                     <span className="text-3xl">{getStageEmoji(project.stage)}</span>
                     <div>
                       <h3 className="text-xl font-bold text-white">{project.title}</h3>
-                      <p className="text-gray-400 text-sm capitalize">
-                        {project.stage}
-                      </p>
+                      <p className="text-gray-400 text-sm capitalize">{project.stage}</p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -251,6 +290,7 @@ export default function MyProjects() {
         )}
       </div>
 
+      {/* Project Detail Modal */}
       {selectedProject && (
         <div className="fixed inset-0 bg-black/95 flex items-center justify-center p-4 z-50 animate-fade-in">
           <div className="bg-gray-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -267,8 +307,9 @@ export default function MyProjects() {
               </button>
             </div>
             
-            <div className="p-6">
-              <div className="mb-6">
+            <div className="p-6 space-y-6">
+              {/* Stage Selector */}
+              <div>
                 <p className="text-sm text-gray-400 mb-3 font-semibold">📊 Stage:</p>
                 <div className="flex flex-wrap gap-2">
                   {STAGES.map(stage => (
@@ -287,7 +328,28 @@ export default function MyProjects() {
                 </div>
               </div>
               
-              <div className="mb-6">
+              {/* README */}
+              <div>
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="font-bold text-green-400">📝 README / About</h3>
+                  <button
+                    onClick={saveReadme}
+                    disabled={readmeSaving}
+                    className="px-4 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+                  >
+                    {readmeSaving ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
+                <textarea
+                  value={readmeText}
+                  onChange={e => setReadmeText(e.target.value)}
+                  placeholder="Write about your project, goals, roadmap, notes..."
+                  className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white h-32 focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+                />
+              </div>
+
+              {/* Milestones */}
+              <div>
                 <h3 className="font-bold mb-3 text-green-400">🏆 Milestones Achieved</h3>
                 <div className="space-y-2 mb-4 max-h-48 overflow-y-auto">
                   {selectedProject.milestones && selectedProject.milestones.length > 0 ? (
@@ -296,12 +358,12 @@ export default function MyProjects() {
                         <span className="text-green-400 text-xl">✓</span>
                         <span className="text-gray-200">{m.title}</span>
                         <span className="text-gray-500 text-sm ml-auto">
-                          {new Date(m.completedAt).toLocaleDateString()}
+                          {m.completedAt ? new Date(m.completedAt).toLocaleDateString() : ''}
                         </span>
                       </div>
                     ))
                   ) : (
-                    <p className="text-gray-500 text-center py-4">No milestones yet. Add your first achievement!</p>
+                    <p className="text-gray-500 text-center py-4">No milestones yet.</p>
                   )}
                 </div>
                 
@@ -310,7 +372,7 @@ export default function MyProjects() {
                     value={milestoneTitle}
                     onChange={e => setMilestoneTitle(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && addMilestone()}
-                    placeholder="✨ What did you just achieve? (e.g., 'Completed MVP')"
+                    placeholder="✨ What did you just achieve?"
                     className="flex-1 p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
                   />
                   <button
@@ -322,7 +384,8 @@ export default function MyProjects() {
                 </div>
               </div>
 
-              <div className="mb-6">
+              {/* Documents */}
+              <div>
                 <div className="flex justify-between items-center mb-3">
                   <h3 className="font-bold text-green-400">📎 Documents</h3>
                   <button
@@ -348,7 +411,7 @@ export default function MyProjects() {
                         <span className="text-2xl">{getFileIcon(doc.name || doc.filename)}</span>
                         <div className="flex-1 min-w-0">
                           <a 
-                            href={doc.url || doc.path} 
+                            href={`${API.replace('/api', '')}${doc.path}`}
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="text-blue-400 hover:text-blue-300 truncate block text-sm"
@@ -374,7 +437,8 @@ export default function MyProjects() {
                 </div>
               </div>
               
-              <div className="mt-6 pt-4 border-t border-gray-700">
+              {/* Delete Project */}
+              <div className="pt-4 border-t border-gray-700">
                 <button
                   onClick={() => deleteProject(selectedProject._id)}
                   className="w-full p-3 bg-red-600/20 border border-red-600 text-red-400 rounded-lg hover:bg-red-600 hover:text-white transition font-semibold"
@@ -383,8 +447,9 @@ export default function MyProjects() {
                 </button>
               </div>
               
+              {/* Collaboration Requests */}
               {selectedProject.collaborationRequests && selectedProject.collaborationRequests.length > 0 && (
-                <div className="mt-6 pt-4 border-t border-gray-700">
+                <div className="pt-4 border-t border-gray-700">
                   <h3 className="font-bold mb-3 text-yellow-400">🤝 Collaboration Requests</h3>
                   <div className="space-y-2">
                     {selectedProject.collaborationRequests.map((req, i) => (
