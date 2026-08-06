@@ -1,13 +1,14 @@
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const transporter = require('../utils/email');
+const { sendResetEmail } = require('../utils/email');
 const User = require('../models/User');
 
 const FRONTEND_URL =
   process.env.FRONTEND_URL ||
   process.env.CLIENT_URL ||
   'http://localhost:3000';
+
 // =====================================================
 // REGISTER
 // =====================================================
@@ -234,87 +235,13 @@ router.post('/forgot-password', async (req, res) => {
 
 
     // -------------------------------------------------
-    // Send email
+    // Send email via Resend
     // -------------------------------------------------
 
-    await transporter.sendMail({
-      from: `"ProjectSync" <${process.env.EMAIL_USER}>`,
-
+    await sendResetEmail({
       to: user.email,
-
-      subject: 'Password Reset - ProjectSync',
-
-      html: `
-        <div style="
-          font-family: Arial, sans-serif;
-          max-width: 600px;
-          margin: 0 auto;
-          background: #1f2937;
-          color: white;
-          padding: 30px;
-          border-radius: 10px;
-        ">
-
-          <h2 style="
-            color: #22c55e;
-            margin-bottom: 20px;
-          ">
-            Password Reset Request
-          </h2>
-
-          <p>
-            Hello ${user.username},
-          </p>
-
-          <p>
-            You requested to reset your
-            ProjectSync password.
-          </p>
-
-          <p>
-            Click the button below to create
-            a new password:
-          </p>
-
-          <div style="
-            text-align: center;
-            margin: 30px 0;
-          ">
-
-            <a
-              href="${resetUrl}"
-              style="
-                display: inline-block;
-                padding: 12px 24px;
-                background-color: #22c55e;
-                color: white;
-                text-decoration: none;
-                border-radius: 5px;
-                font-weight: bold;
-              "
-            >
-              Reset Password
-            </a>
-
-          </div>
-
-          <p style="
-            color: #9ca3af;
-            font-size: 12px;
-          ">
-            This link will expire in 1 hour.
-          </p>
-
-          <p style="
-            color: #9ca3af;
-            font-size: 12px;
-          ">
-            If you did not request this password reset,
-            you can safely ignore this email.
-          </p>
-
-        </div>
-      `
+      username: user.username,
+      resetUrl
     });
 
 
