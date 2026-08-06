@@ -1,7 +1,23 @@
 const router = require('express').Router();
+const multer = require('multer');
+const path = require('path');
 const auth = require('../middleware/auth');
 const Project = require('../models/Project');
 const User = require('../models/User');
+
+// Ensure uploads folder exists
+const fs = require('fs');
+if (!fs.existsSync('uploads')) fs.mkdirSync('uploads');
+
+// Multer config
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, 'uploads/'),
+  filename: (req, file, cb) => {
+    const unique = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, unique + path.extname(file.originalname));
+  }
+});
+const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 
 // Create new project
 router.post('/', auth, async (req, res) => {
@@ -64,6 +80,40 @@ router.get('/my-projects', auth, async (req, res) => {
   }
 });
 
+// PATCH - Update stage or readme
+router.patch('/:id', auth, async (req, res) => {
+  try {
+    const updates = {};
+    if (req.body.stage) updates.stage = req.body.stage;
+    if (req.body.readme !== undefined) updates.readme = req.body.readme;
+
+    const project = await Project.findOneAndUpdate(
+      { _id: req.params.id, owner: req.userId },
+      { $set: updates },
+      { new: true }
+    );
+
+    if (!project) return res.status(404).json({ error: 'Project not found' });
+    res.json(project);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// DELETE project
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const project = await Project.findOneAndDelete({
+      _id: req.params.id,
+      owner: req.userId
+    });
+    if (!project) return res.status(404).json({ error: 'Project not found' });
+    res.json({ message: 'Deleted' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Add milestone
 router.post('/:id/milestone', auth, async (req, res) => {
   try {
@@ -79,10 +129,10 @@ router.post('/:id/milestone', auth, async (req, res) => {
     
     project.milestones.push({
       title: req.body.title,
-      description: req.body.description || req.body.title
+      description: req.body.description || req.body.title,
+      completedAt: new Date()
     });
     
-    // Update progress (estimated 10 milestones for 100%)
     const estimatedTotal = 10;
     const completedCount = project.milestones.length;
     project.progress = Math.min(100, Math.round((completedCount / estimatedTotal) * 100));
@@ -105,6 +155,47 @@ router.post('/:id/milestone', auth, async (req, res) => {
     res.json(project);
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+});
+
+// Upload document
+router.post('/:id/documents', auth, upload.single('document'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
+    const doc = {
+      name: req.file.originalname,
+      filename: req.file.filename,
+      path: `/uploads/${req.file.filename}`,
+      size: req.file.size,
+      uploadedAt: new Date()
+    };
+
+    const project = await Project.findOneAndUpdate(
+      { _id: req.params.id, owner: req.userId },
+      { $push: { documents: doc } },
+      { new: true }
+    );
+
+    if (!project) return res.status(404).json({ error: 'Project not found' });
+    res.json(doc);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete document
+router.delete('/:id/documents/:docId', auth, async (req, res) => {
+  try {
+    const project = await Project.findOneAndUpdate(
+      { _id: req.params.id, owner: req.userId },
+      { $pull: { documents: { _id: req.params.docId } } },
+      { new: true }
+    );
+    if (!project) return res.status(404).json({ error: 'Not found' });
+    res.json({ message: 'Deleted' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 

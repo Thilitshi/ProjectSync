@@ -196,6 +196,10 @@ app.set('io', io);
 // ============================================
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
+app.use('/uploads', express.static('uploads'));
+
+app.use('/api/auth', authRoutes);
+app.use('/api/projects', projectRoutes);
 
 // ============================================
 // 📱 Serve Frontend (Production Only)
