@@ -46,10 +46,31 @@ const server = http.createServer(app);
 // ============================================
 const allowedOrigins = [
   'http://localhost:3000',
-  'http://localhost:5173'
+  'http://localhost:5173',
   process.env.CLIENT_URL,
   process.env.FRONTEND_URL
 ].filter(Boolean);
+app.use(cors({
+  origin: function (origin, callback) {
+
+    // Allow requests without an origin
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    console.log('❌ CORS blocked:', origin);
+
+    return callback(
+      new Error('Not allowed by CORS')
+    );
+  },
+
+  credentials: true
+}));
 
 console.log('📧 EMAIL_USER:', process.env.EMAIL_USER || 'NOT SET');
 console.log('📧 EMAIL_PASSWORD exists:', !!process.env.EMAIL_PASSWORD);

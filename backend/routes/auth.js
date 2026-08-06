@@ -1,15 +1,13 @@
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const transporter = require('../config/email');
+const transporter = require('../utils/email');
 const User = require('../models/User');
 
 const FRONTEND_URL =
   process.env.FRONTEND_URL ||
   process.env.CLIENT_URL ||
   'http://localhost:3000';
-
-
 // =====================================================
 // REGISTER
 // =====================================================
