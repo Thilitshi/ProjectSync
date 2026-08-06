@@ -44,8 +44,7 @@ export default function CreateProject({ token, onSuccess, onCancel }) {
     setLoading(true);
     setError('');
 
-    const authToken = token || localStorage.getItem('token');
-
+    const authToken = token || sessionStorage.getItem('token');
     if (!form.title.trim()) {
       setError('Project title is required');
       setLoading(false);

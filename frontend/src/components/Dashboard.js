@@ -39,6 +39,7 @@ function Dashboard({ token, setToken }) {
   
   const handleLogout = () => {
     if (socket) socket.close();
+    sessionStorage.removeItem('token');
     setToken(null);
     toast.success('Logged out successfully');
     navigate('/login');

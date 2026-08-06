@@ -12,12 +12,10 @@ export default function Feed() {
   
   const socket = useSocket();
 
-  // Fetch projects on mount
   useEffect(() => {
     fetchProjects();
   }, []);
 
-  // Socket.io real-time updates
   useEffect(() => {
     if (!socket) return;
     
@@ -56,7 +54,7 @@ export default function Feed() {
 
   const fetchProjects = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token'); // ✅ CHANGED
       
       const res = await fetch(`${API}/projects/feed`, {
         headers: {
@@ -67,7 +65,8 @@ export default function Feed() {
       if (!res.ok) {
         if (res.status === 401) {
           console.log('Token invalid, redirecting to login...');
-          window.location.href = '/login';
+          sessionStorage.removeItem('token'); // ✅ clear bad token
+          window.location.reload(); // ✅ force back to home/login
         }
         throw new Error('Failed to fetch projects');
       }
@@ -83,7 +82,7 @@ export default function Feed() {
 
   const fetchComments = async (projectId) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token'); // ✅ CHANGED
       
       const res = await fetch(`${API}/comments/project/${projectId}`, {
         headers: {
@@ -106,7 +105,7 @@ export default function Feed() {
   };
 
   const submitComment = async () => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token'); // ✅ CHANGED
     if (!token) {
       alert('Please login to comment');
       return;
@@ -142,7 +141,7 @@ export default function Feed() {
   };
 
   const requestCollaboration = async () => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token'); // ✅ CHANGED
     if (!token) {
       alert('Please login to request collaboration');
       return;
@@ -191,6 +190,7 @@ export default function Feed() {
     return emojis[stage] || '💡';
   };
 
+  
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-black text-white p-8 flex items-center justify-center">
