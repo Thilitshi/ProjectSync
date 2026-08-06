@@ -1,19 +1,22 @@
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 const User = require('../models/User');
+
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 // Register
 router.post('/register', async (req, res) => {
   try {
     const { username, email, password } = req.body;
     
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    const existingUser = await User.findOne({ $or: [{ email: email.toLowerCase() }, { username }] });
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists with this email or username' });
     }
     
-    const user = new User({ username, email, password });
+    const user = new User({ username, email: email.toLowerCase(), password });
     await user.save();
     
     const token = jwt.sign(
@@ -74,14 +77,17 @@ router.get('/me', require('../middleware/auth'), async (req, res) => {
   }
 });
 
-// Forgot Password - WITH EMAIL SENDING
+// Forgot Password
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email is required' });
+
     const user = await User.findOne({ email: email.toLowerCase() });
     
     if (!user) {
-      return res.status(404).json({ error: 'No account with that email exists' });
+      // Don't reveal if email exists
+      return res.json({ message: 'If an account exists, a reset link has been sent.' });
     }
 
     // Generate reset token
@@ -95,20 +101,19 @@ router.post('/forgot-password', async (req, res) => {
     user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
     await user.save();
 
-    const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
+    // ✅ FIXED: Use env var for frontend URL
+    const resetUrl = `${FRONTEND_URL}/reset-password/${resetToken}`;
     
     console.log('\n🔐 ===== PASSWORD RESET LINK =====');
     console.log(`Reset URL: ${resetUrl}`);
     console.log('🔐 ================================\n');
 
-    // ✅ SEND REAL EMAIL (if configured)
+    // Send email if configured
     const emailUser = process.env.EMAIL_USER;
     const emailPass = process.env.EMAIL_PASSWORD;
     
-    if (emailUser && emailPass && emailUser !== 'your-email@gmail.com') {
+    if (emailUser && emailPass) {
       try {
-        const nodemailer = require('nodemailer');
-        
         const transporter = nodemailer.createTransport({
           service: 'gmail',
           auth: {
@@ -117,7 +122,7 @@ router.post('/forgot-password', async (req, res) => {
           }
         });
         
-        const mailOptions = {
+        await transporter.sendMail({
           from: `"ProjectSync" <${emailUser}>`,
           to: user.email,
           subject: '🔐 Password Reset - ProjectSync',
@@ -125,32 +130,29 @@ router.post('/forgot-password', async (req, res) => {
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #1f2937; color: white; padding: 20px; border-radius: 10px;">
               <h2 style="color: #22c55e;">🔐 Password Reset Request</h2>
               <p>Hello ${user.username},</p>
-              <p>You requested to reset your password. Click the button below to create a new password:</p>
+              <p>You requested to reset your password. Click the button below:</p>
               <div style="text-align: center; margin: 30px 0;">
                 <a href="${resetUrl}" style="display: inline-block; padding: 12px 24px; background-color: #22c55e; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">Reset Password</a>
               </div>
               <p style="color: #9ca3af; font-size: 12px;">This link will expire in 1 hour.</p>
               <p style="color: #9ca3af; font-size: 12px;">If you didn't request this, please ignore this email.</p>
-              <hr style="border-color: #374151;">
-              <p style="color: #6b7280; font-size: 11px;">ProjectSync - Build in Public Platform</p>
             </div>
           `
-        };
+        });
         
-        await transporter.sendMail(mailOptions);
-        console.log('✅ Email sent successfully to:', user.email);
-        res.json({ message: 'Password reset email sent! Check your inbox.' });
+        console.log('✅ Email sent to:', user.email);
+        return res.json({ message: 'Password reset email sent! Check your inbox.' });
         
       } catch (emailErr) {
-        console.log('❌ Email failed to send:', emailErr.message);
-        console.log('✅ Reset link available in console above');
-        res.json({ message: 'Password reset link generated (check console for link)' });
+        console.log('❌ Email failed:', emailErr.message);
+        console.log('✅ Use this link instead:', resetUrl);
+        return res.json({ message: 'Email service unavailable. Contact support or check server logs for the reset link.' });
       }
-    } else {
-      console.log('⚠️ Email not configured. Add EMAIL_USER and EMAIL_PASSWORD to .env');
-      console.log('✅ Reset link available in console above');
-      res.json({ message: 'Password reset link generated (check server console for link)' });
     }
+    
+    // No email configured
+    console.log('⚠️ Email not configured. Add EMAIL_USER and EMAIL_PASSWORD to .env');
+    return res.json({ message: 'Password reset link generated (check server console for link)' });
     
   } catch (error) {
     console.error('Forgot password error:', error);
