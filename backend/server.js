@@ -47,6 +47,8 @@ const server = http.createServer(app);
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173'
+  process.env.CLIENT_URL,
+  process.env.FRONTEND_URL
 ].filter(Boolean);
 
 console.log('📧 EMAIL_USER:', process.env.EMAIL_USER || 'NOT SET');
